@@ -1,4 +1,4 @@
-require('dotenv').config(); // Load environment variables
+require('dotenv').config(); 
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -10,12 +10,12 @@ const jwt = require('jsonwebtoken');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// MongoDB Connection (from .env file)
+
 const MONGODB_URI = process.env.MONGODB_URI;
 
 mongoose.connect(MONGODB_URI, {
@@ -25,15 +25,15 @@ mongoose.connect(MONGODB_URI, {
 .then(() => console.log('✅ Connected to MongoDB Atlas'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Check MongoDB connection status
+
 const isMongoConnected = () => {
   return mongoose.connection.readyState === 1;
 };
 
-// JWT Secret from environment variable
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// User Schema
+
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// Donation Schema
+
 const donationSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
@@ -63,7 +63,7 @@ const donationSchema = new mongoose.Schema({
 
 const Donation = mongoose.model('Donation', donationSchema);
 
-// Request Schema
+
 const requestSchema = new mongoose.Schema({
   donationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Donation', required: true },
   donationTitle: { type: String, required: true },
@@ -79,10 +79,7 @@ const requestSchema = new mongoose.Schema({
 
 const Request = mongoose.model('Request', requestSchema);
 
-// JWT Secret (in production, use environment variable)
-//const JWT_SECRET = 'your_jwt_secret_key_here';//
 
-// Auth Middleware
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -100,24 +97,22 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Routes
 
-// Register User
 app.post('/api/register', async (req, res) => {
   try {
     const { name, email, password, phone, address, userType } = req.body;
 
-    // Check if user already exists
+    
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Hash password
+    
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create new user
+    
     const user = new User({
       name,
       email,
@@ -129,7 +124,7 @@ app.post('/api/register', async (req, res) => {
 
     await user.save();
 
-    // Generate JWT token
+    
     const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
 
     res.status(201).json({
@@ -147,24 +142,24 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// Login User
+
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
+    
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Check password
+    
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Generate JWT token
+    
     const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
 
     res.json({
@@ -182,7 +177,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Create Donation
+
 app.post('/api/donations', authenticateToken, async (req, res) => {
   try {
     const { title, description, foodType, quantity, expiryDate, location, contactInfo } = req.body;
@@ -211,10 +206,10 @@ app.post('/api/donations', authenticateToken, async (req, res) => {
   }
 });
 
-// Get All Donations
+
 app.get('/api/donations', async (req, res) => {
   try {
-    // Check if MongoDB is connected
+    
     if (!isMongoConnected()) {
       return res.json([]);
     }
@@ -229,7 +224,7 @@ app.get('/api/donations', async (req, res) => {
   }
 });
 
-// Get User's Donations
+
 app.get('/api/my-donations', authenticateToken, async (req, res) => {
   try {
     const donations = await Donation.find({ donorId: req.user.userId })
@@ -240,7 +235,7 @@ app.get('/api/my-donations', authenticateToken, async (req, res) => {
   }
 });
 
-// Update Donation Status
+
 app.patch('/api/donations/:id', authenticateToken, async (req, res) => {
   try {
     const { status } = req.body;
@@ -260,7 +255,7 @@ app.patch('/api/donations/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Delete Donation
+
 app.delete('/api/donations/:id', authenticateToken, async (req, res) => {
   try {
     const donation = await Donation.findOneAndDelete({
@@ -278,7 +273,7 @@ app.delete('/api/donations/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Create Food Request
+
 app.post('/api/requests', authenticateToken, async (req, res) => {
   try {
     const { donationId, reason } = req.body;
@@ -319,7 +314,7 @@ app.post('/api/requests', authenticateToken, async (req, res) => {
   }
 });
 
-// Get Requests for Donor
+
 app.get('/api/my-requests', authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
@@ -329,13 +324,13 @@ app.get('/api/my-requests', authenticateToken, async (req, res) => {
 
     let requests;
     if (user.userType === 'donor') {
-      // Get requests for donor's donations
+      
       const donations = await Donation.find({ donorId: user._id });
       const donationIds = donations.map(d => d._id);
       requests = await Request.find({ donationId: { $in: donationIds } })
         .sort({ createdAt: -1 });
     } else {
-      // Get requests made by recipient
+      
       requests = await Request.find({ recipientId: user._id })
         .sort({ createdAt: -1 });
     }
@@ -346,7 +341,7 @@ app.get('/api/my-requests', authenticateToken, async (req, res) => {
   }
 });
 
-// Update Request Status (Accept/Reject)
+
 app.patch('/api/requests/:id', authenticateToken, async (req, res) => {
   try {
     const { status, donorResponse } = req.body;
@@ -356,7 +351,7 @@ app.patch('/api/requests/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ message: 'Request not found' });
     }
 
-    // Verify the user is the donor of this donation
+    
     const donation = await Donation.findById(request.donationId);
     if (!donation || donation.donorId.toString() !== req.user.userId) {
       return res.status(403).json({ message: 'Not authorized to update this request' });
@@ -369,7 +364,7 @@ app.patch('/api/requests/:id', authenticateToken, async (req, res) => {
 
     await request.save();
 
-    // If accepted, mark donation as claimed
+    
     if (status === 'accepted') {
       donation.status = 'claimed';
       await donation.save();
@@ -381,7 +376,7 @@ app.patch('/api/requests/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Serve frontend
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
