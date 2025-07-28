@@ -241,15 +241,17 @@ function showDashboard() {
         showLoginModal();
         return;
     }
-    
+
     hideAllSections();
-    document.getElementById('dashboard').style.display = 'block';
+    const dashboard = document.getElementById('dashboard');
+    dashboard.style.display = 'block';
     loadUserDonations();
     loadRequests(); // Load requests when dashboard opens
-    
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // ✅ Scroll directly to the dashboard section
+    dashboard.scrollIntoView({ behavior: 'smooth' });
 }
+
 
 function showSection(sectionId) {
     hideAllSections();
