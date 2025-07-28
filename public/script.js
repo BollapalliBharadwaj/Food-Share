@@ -1,14 +1,14 @@
-// Global state
+
 let currentUser = null;
 let authToken = null;
 let donations = [];
 
-// DOM Content Loaded
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
     loadDonations();
     
-    // Check for existing authentication
+    
     const token = localStorage.getItem('authToken');
     const user = localStorage.getItem('currentUser');
     
@@ -19,19 +19,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Initialize app
+
 function initializeApp() {
-    // Form event listeners
+   
     document.getElementById('login-form').addEventListener('submit', handleLogin);
     document.getElementById('register-form').addEventListener('submit', handleRegister);
     document.getElementById('donation-form').addEventListener('submit', handleDonationSubmit);
     document.getElementById('request-form').addEventListener('submit', handleRequestSubmit);
     
-    // Search and filter event listeners
+    
     document.getElementById('search-input').addEventListener('input', filterDonations);
     document.getElementById('food-type-filter').addEventListener('change', filterDonations);
     
-    // Modal event listeners
+    
     window.addEventListener('click', function(event) {
         const modals = document.querySelectorAll('.modal');
         modals.forEach(modal => {
@@ -41,7 +41,7 @@ function initializeApp() {
         });
     });
     
-    // Smooth scrolling for navigation links
+    
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -56,7 +56,7 @@ function initializeApp() {
     });
 }
 
-// Authentication Functions
+
 async function handleLogin(e) {
     e.preventDefault();
     
@@ -78,7 +78,7 @@ async function handleLogin(e) {
             authToken = data.token;
             currentUser = data.user;
             
-            // Store in localStorage
+            
             localStorage.setItem('authToken', authToken);
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             
@@ -86,7 +86,7 @@ async function handleLogin(e) {
             closeModal('login-modal');
             showNotification('Login successful!', 'success');
             
-            // Reset form
+            
             document.getElementById('login-form').reset();
         } else {
             showNotification(data.message || 'Login failed', 'error');
@@ -124,7 +124,7 @@ async function handleRegister(e) {
             authToken = data.token;
             currentUser = data.user;
             
-            // Store in localStorage
+            
             localStorage.setItem('authToken', authToken);
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             
@@ -132,7 +132,7 @@ async function handleRegister(e) {
             closeModal('register-modal');
             showNotification('Registration successful!', 'success');
             
-            // Reset form
+           
             document.getElementById('register-form').reset();
         } else {
             showNotification(data.message || 'Registration failed', 'error');
@@ -147,7 +147,7 @@ function logout() {
     authToken = null;
     currentUser = null;
     
-    // Clear localStorage
+    
     localStorage.removeItem('authToken');
     localStorage.removeItem('currentUser');
     
@@ -157,17 +157,17 @@ function logout() {
     showNotification('Logged out successfully!', 'success');
 }
 
-// UI Update Functions
+
 function updateUIForLoggedInUser() {
-    // Hide auth buttons
+    
     document.querySelector('.auth-buttons').style.display = 'none';
     
-    // Show user menu
+    
     const userMenu = document.querySelector('.user-menu');
     userMenu.style.display = 'flex';
     document.querySelector('.user-name').textContent = currentUser.name;
     
-    // Update hero buttons if user is logged in
+    
     const heroButtons = document.querySelector('.hero-buttons');
     if (currentUser.userType === 'donor') {
         heroButtons.innerHTML = `
@@ -183,13 +183,13 @@ function updateUIForLoggedInUser() {
 }
 
 function updateUIForLoggedOutUser() {
-    // Show auth buttons
+    
     document.querySelector('.auth-buttons').style.display = 'flex';
     
-    // Hide user menu
+    
     document.querySelector('.user-menu').style.display = 'none';
     
-    // Reset hero buttons
+    
     const heroButtons = document.querySelector('.hero-buttons');
     heroButtons.innerHTML = `
         <button class="btn btn-primary btn-large" onclick="showRegisterModal('donor')">Donate Food</button>
@@ -197,7 +197,7 @@ function updateUIForLoggedOutUser() {
     `;
 }
 
-// Modal Functions
+
 function showLoginModal() {
     document.getElementById('login-modal').style.display = 'block';
 }
@@ -225,7 +225,7 @@ function showDonationModal() {
     
     document.getElementById('donation-modal').style.display = 'block';
     
-    // Set minimum date to today
+    
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('donation-expiry').min = today;
 }
@@ -234,7 +234,7 @@ function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
 }
 
-// Dashboard Functions
+
 function showDashboard() {
     if (!currentUser) {
         showNotification('Please login first', 'error');
@@ -246,9 +246,9 @@ function showDashboard() {
     const dashboard = document.getElementById('dashboard');
     dashboard.style.display = 'block';
     loadUserDonations();
-    loadRequests(); // Load requests when dashboard opens
+    loadRequests(); 
 
-    // ✅ Scroll directly to the dashboard section
+    
     dashboard.scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -263,15 +263,15 @@ function showSection(sectionId) {
 
 function hideAllSections() {
     document.getElementById('dashboard').style.display = 'none';
-    // Note: Other sections are always visible, we just scroll to them
+    
 }
 
 function showTab(tabName) {
-    // Remove active class from all tabs
+    
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     
-    // Add active class to clicked tab
+    
     event.target.classList.add('active');
     document.getElementById(tabName).classList.add('active');
     
@@ -295,7 +295,7 @@ function showProfile() {
     }
 }
 
-// Donation Functions
+
 async function handleDonationSubmit(e) {
     e.preventDefault();
     
@@ -326,7 +326,7 @@ async function handleDonationSubmit(e) {
             showNotification('Donation added successfully!', 'success');
             document.getElementById('donation-form').reset();
             
-            // Refresh donations
+            
             loadDonations();
             if (document.getElementById('dashboard').style.display !== 'none') {
                 loadUserDonations();
@@ -400,7 +400,7 @@ function displayDonations(donationsToShow) {
     
     grid.innerHTML = donationsToShow.map(donation => {
         const expiryDate = new Date(donation.expiryDate);
-        const isExpiringSoon = (expiryDate - new Date()) < (24 * 60 * 60 * 1000); // 1 day
+        const isExpiringSoon = (expiryDate - new Date()) < (24 * 60 * 60 * 1000); 
         
         return `
             <div class="donation-card slide-up">
@@ -481,7 +481,7 @@ function displayUserDonations(userDonations) {
     }).join('');
 }
 
-// Donation Actions
+
 function contactDonor(donationId, contactInfo, donationTitle) {
     if (!currentUser) {
         showNotification('Please login to contact donors', 'error');
@@ -489,14 +489,11 @@ function contactDonor(donationId, contactInfo, donationTitle) {
         return;
     }
     
-    // Create a modal or alert with contact information
+    
     const message = `Contact information for "${donationTitle}":\n\n${contactInfo}\n\nPlease reach out to arrange pickup!`;
     alert(message);
     
-    // In a real app, you might want to:
-    // - Open email client with pre-filled email
-    // - Show phone number with call option
-    // - Create internal messaging system
+   
 }
 
 async function updateDonationStatus(donationId, status) {
@@ -515,7 +512,7 @@ async function updateDonationStatus(donationId, status) {
         if (response.ok) {
             showNotification(`Donation marked as ${status}!`, 'success');
             loadUserDonations();
-            loadDonations(); // Refresh main donations list
+            loadDonations(); 
         } else {
             showNotification(data.message || 'Failed to update donation', 'error');
         }
@@ -543,7 +540,7 @@ async function deleteDonation(donationId) {
         if (response.ok) {
             showNotification('Donation deleted successfully!', 'success');
             loadUserDonations();
-            loadDonations(); // Refresh main donations list
+            loadDonations(); 
         } else {
             showNotification(data.message || 'Failed to delete donation', 'error');
         }
@@ -553,7 +550,7 @@ async function deleteDonation(donationId) {
     }
 }
 
-// Request Functions
+
 function requestFood(donationId, donationTitle) {
     if (!currentUser) {
         showNotification('Please login to request food', 'error');
@@ -639,10 +636,10 @@ function displayRequests(requests) {
         return;
     }
     
-    // Group requests by donation for donors
+    
     let displayRequests = requests;
     if (currentUser.userType === 'donor') {
-        // Sort by donation title and then by creation date
+        
         displayRequests = requests.sort((a, b) => {
             if (a.donationTitle !== b.donationTitle) {
                 return a.donationTitle.localeCompare(b.donationTitle);
@@ -654,7 +651,7 @@ function displayRequests(requests) {
     container.innerHTML = displayRequests.map((request, index) => {
         const createdDate = new Date(request.createdAt);
         
-        // Show donation title separator for donors when donation changes
+        
         const showSeparator = currentUser.userType === 'donor' && 
             index > 0 && 
             displayRequests[index - 1].donationTitle !== request.donationTitle;
@@ -723,7 +720,7 @@ async function respondToRequest(status) {
             closeModal('response-modal');
             showNotification(`Request ${status} successfully!`, 'success');
             loadRequests();
-            loadUserDonations(); // Refresh donations if accepted
+            loadUserDonations(); 
         } else {
             showNotification(data.message || 'Failed to respond to request', 'error');
         }
@@ -733,7 +730,7 @@ async function respondToRequest(status) {
     }
 }
 
-// Search and Filter Functions
+
 function filterDonations() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
     const foodTypeFilter = document.getElementById('food-type-filter').value;
@@ -753,9 +750,9 @@ function filterDonations() {
     displayDonations(filteredDonations);
 }
 
-// Notification Function
+
 function showNotification(message, type = 'info') {
-    // Create notification element
+    
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.style.cssText = `
@@ -779,10 +776,10 @@ function showNotification(message, type = 'info') {
         </div>
     `;
     
-    // Add to DOM
+    
     document.body.appendChild(notification);
     
-    // Remove after 3 seconds
+    
     setTimeout(() => {
         notification.style.animation = 'slideOutRight 0.3s ease';
         setTimeout(() => {
@@ -791,7 +788,7 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// Add CSS for notification animations
+
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideInRight {
@@ -818,7 +815,7 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Auto-refresh donations every 30 seconds
+
 setInterval(() => {
     if (document.getElementById('dashboard').style.display === 'none') {
         loadDonations();
